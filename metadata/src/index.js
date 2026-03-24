@@ -112,7 +112,7 @@ async function main() {
 if (require.main === module) {
   // Only start the microservice normally if this script is the "main" module.
   main().catch((err) => {
-    console.error("Microservice failed to start.");
+    console.error("Microservice failed to start");
     console.error((err && err.stack) || err);
   });
 } else {
