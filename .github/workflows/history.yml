@@ -1,0 +1,36 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Deploy history
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - history/**
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04-arm
+    env:
+      VERSION: ${{ github.sha }}
+      CONTAINER_REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
+      REGISTRY_UN: ${{ secrets.REGISTRY_UN }}
+      REGISTRY_PW: ${{ secrets.REGISTRY_PW }}
+      NAME: history
+      DIRECTORY: history
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build
+        run: ./scripts/cd/build-image.sh
+      - name: Publish
+        run: ./scripts/cd/push-image.sh
+
+      - uses: tale/kubectl-action@v1
+        with:
+          base64-kube-config: ${{ secrets.KUBE_CONFIG }}
+          kubectl-version: v1.35.0
+      - name: Deploy
+        run: ./scripts/cd/deploy.sh
